@@ -32,10 +32,58 @@ So far, I have used the janitor::clean_names() function for some basic cleanings
 
 The dimension of the dataset now is 1868 rows x 32 columns. Despite I have changed the entry variable from character to logical type, the dataset is still not tidy, as there are many more character variables that could be turned into logical variables, and there are many NA data in it that may interfere further data analysis. 
 
+- How many distinct stations are there?
+
+```{r}
+distinct(NYC_df, line, station_name)
+```
+
+There are 465 distinct stations. 
+
+- How many stations are ADA compliant?
+```{r}
+filter(NYC_df, ada == TRUE)
+```
+
+468 stations are ADA compliant. 
+
+- What proportion of station entrances / exits without vending allow entrance?
+
+```{r}
+vending_df = filter(NYC_df, vending == "NO")
+vending_entry_df = filter(vending_df, entry == "TRUE")
+nrow(vending_entry_df)/nrow(vending_df)
+```
+
+About 37.7% of stations without vending allow entrance.
+
+- Reformat data so that route number and route name are distinct variables. How many distinct stations serve the A train? Of the stations that serve the A train, how many are ADA compliant?
+
+```{r}
+NYC_df = mutate(
+    NYC_df,
+    route8 = as.character(route8),
+    route9 = as.character(route9),
+    route10 = as.character(route10),
+    route11 = as.character(route11)
+  ) |>
+  pivot_longer(
+  cols = route1:route11,
+  names_to = "route_number",
+  values_to = "route_name",
+  names_prefix = "route")
+print(NYC_df)
+```
 
 
+```{r}
+A_df = filter(NYC_df, route_name == "A")
+A_ada_df = filter(A_df, ada == "TRUE")
+A_distinct = distinct(A_df, line, station_name)
+A_ada_distinct = distinct(A_ada_df, line, station_name)
+```
 
-
+`r nrow(A_distinct)` distinct stations serve the A train. Out of these stations, `r nrow(A_ada_distinct)` stations are ADA compliant.
 
 
 
