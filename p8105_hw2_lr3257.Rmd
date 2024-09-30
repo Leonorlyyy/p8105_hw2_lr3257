@@ -5,26 +5,44 @@ date: "2024-09-30"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, echo=FALSE, message=FALSE}
+library(tidyverse)
 ```
 
-## R Markdown
+# Homework 2
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Problem 1
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+### read data file
+NYC_df = 
+  read_csv("data/NYCsubway.csv",  na = c("NA", "", "."), show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  mutate(
+    entry = ifelse(entry == "YES", TRUE, FALSE)
+    )
 
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+### Description:
 
-You can also embed plots, for example:
+There are 32 variables contained in this dataset: division (character), line (character), station_name (character), station_latitude (double), station_longtitude (double), route 1-7 (character), route 8-11 (double), entrance_type (character), entry (character), exit_only (character), vending (character), staffing (character), staff_hours (character), ada (logical), ada_notes (character), free_crossover (logical), north_south_street (character), east_west_street (character), corner (character), entrance_latitude (double), entrance_longitude (double), station_location (character), entrance_location (character). 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+So far, I have used the janitor::clean_names() function for some basic cleanings about the column names, including converting all column names to lowercase, replacing spaces and special characters with underscores, etc. I have also defined the "NA", ",", and "." values in the dataset to be na for the convenience of later data analysis. 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The dimension of the dataset now is 1868 rows x 32 columns. Despite I have changed the entry variable from character to logical type, the dataset is still not tidy, as there are many more character variables that could be turned into logical variables, and there are many NA data in it that may interfere further data analysis. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
