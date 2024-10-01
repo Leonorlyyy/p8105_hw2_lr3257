@@ -7,6 +7,8 @@ output: github_document
 
 ```{r setup, echo=FALSE, message=FALSE}
 library(tidyverse)
+library(readxl)
+library(dplyr)
 ```
 
 # Homework 2
@@ -71,7 +73,8 @@ NYC_df = mutate(
   cols = route1:route11,
   names_to = "route_number",
   values_to = "route_name",
-  names_prefix = "route")
+  names_prefix = "route") |>
+  drop_na(route_name)
 print(NYC_df)
 ```
 
@@ -84,6 +87,52 @@ A_ada_distinct = distinct(A_ada_df, line, station_name)
 ```
 
 `r nrow(A_distinct)` distinct stations serve the A train. Out of these stations, `r nrow(A_ada_distinct)` stations are ADA compliant.
+
+## Problem 2
+
+### Mr. Trash Wheel sheet
+
+```{r}
+Mr_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Mr. Trash Wheel",
+                   col_types = c("numeric", "skip", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric","numeric", "numeric", "numeric", "numeric","numeric","skip","skip")) |>
+  janitor::clean_names() |>
+  mutate(
+    sports_balls = as.integer(round(sports_balls))
+  ) |>
+  slice(1:(n()-1))
+print(Mr_TW)
+```
+
+### Professor Trash Wheel
+
+```{r}
+Prof_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Professor Trash Wheel",
+                      col_types = c("numeric", "skip", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric","numeric", "numeric", "numeric", "numeric")) |>
+  janitor::clean_names() |>
+  slice(1:(n()-1))
+print(Prof_TW)
+```
+
+### Gwynnda 
+
+```{r}
+G_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Gwynnda Trash Wheel",
+                      col_types = c("numeric", "skip", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric","numeric", "numeric", "numeric")) |>
+  janitor::clean_names() |>
+  slice(1:(n()-2))
+print(G_TW)
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
