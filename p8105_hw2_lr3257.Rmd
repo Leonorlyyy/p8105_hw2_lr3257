@@ -44,10 +44,11 @@ There are 465 distinct stations.
 
 - How many stations are ADA compliant?
 ```{r}
-filter(NYC_df, ada == TRUE)
+filter(NYC_df, ada == TRUE) |>
+  distinct(line, station_name)
 ```
 
-468 stations are ADA compliant. 
+84 stations are ADA compliant. 
 
 - What proportion of station entrances / exits without vending allow entrance?
 
