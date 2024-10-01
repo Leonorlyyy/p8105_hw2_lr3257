@@ -123,6 +123,30 @@ G_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Gwynnda Trash Wheel",
 print(G_TW)
 ```
 
+### Combine datasets
+
+```{r}
+Mr_TW = mutate(Mr_TW, trash_wheel = "Mr. Trash Wheel") |>
+  relocate (trash_wheel)
+
+Prof_TW = Prof_TW |>
+  add_column(sports_balls = NA, .before = 10)|>
+  mutate(
+    trash_wheel = "Professor Trash Wheel"
+  ) |>
+  relocate(trash_wheel)
+
+G_TW = G_TW |>
+  add_column(sports_balls = NA, .before = 9) |>
+  add_column(glass_bottles = NA, .after = 6) |>
+  mutate(
+    trash_wheel = "Gwynnda Trash Wheel"
+  ) |>
+  relocate(trash_wheel)
+
+combined_TW = bind_rows(Mr_TW, Prof_TW, G_TW)
+print(combined_TW)
+```
 
 
 
