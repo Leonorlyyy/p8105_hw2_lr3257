@@ -102,7 +102,7 @@ Mr_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Mr. Trash Wheel") |>
     year = as.numeric(year)
   ) |>
   select(-(x15:x16)) |>
-  slice(1:(n()-1))
+  slice(1:(n()-2))
 print(Mr_TW)
 ```
 
@@ -111,7 +111,7 @@ print(Mr_TW)
 ```{r}
 Prof_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Professor Trash Wheel")|>
   janitor::clean_names() |>
-  slice(1:(n()-1))
+  slice(1:(n()-3))
 print(Prof_TW)
 ```
 
@@ -120,7 +120,7 @@ print(Prof_TW)
 ```{r}
 G_TW = read_excel("data/Trash_wheel.xlsx", sheet = "Gwynnda Trash Wheel") |>
   janitor::clean_names() |>
-  slice(1:(n()-2))
+  slice(1:(n()-1))
 print(G_TW)
 ```
 
