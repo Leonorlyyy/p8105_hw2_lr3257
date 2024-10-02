@@ -9,6 +9,7 @@ output: github_document
 library(tidyverse)
 library(readxl)
 library(dplyr)
+library(tibble)
 ```
 
 # Homework 2
@@ -162,10 +163,104 @@ filter(G_TW, month == "June", year == 2022) |>
 
 The total number of cigarette butts collected by Gwynnda in June of 2022 is 18120.
 
+## Problem 3
+
+Import datasets, basic clean ups
+```{r}
+bakers_df = read_csv("data/gbb_datasets/bakers.csv", na = c("N/A", "", "."), show_col_types = FALSE) |>
+  janitor::clean_names() 
+
+bakes_df = read_csv("data/gbb_datasets/bakes.csv", na = c("N/A", "", "."), show_col_types = FALSE) |>
+  janitor::clean_names()
+
+results_df = 
+  read_csv("data/gbb_datasets/results.csv", na = c("NA", "", "."), show_col_types = FALSE, skip = 2) |>
+  janitor::clean_names() |>
+  drop_na(result) |>
+  mutate(result = case_when(
+    result == "IN" ~ "Stayed in",
+    result == "OUT" ~ "Eliminated",
+    result == "STAR BAKER" ~ "Star Baker",
+    result == "WINNER" ~ "Series Winner",
+    result == "Runner-up" ~ "Series Runner-up",
+    result == "WD" ~ "Withdrew",
+    TRUE ~ result))
+```
 
 
+```{r}
+## join results_df and bakes_df first
+gbb_df = 
+  left_join(results_df, bakes_df, by = c("series", "episode", "baker")) 
 
+## check if left any rows out
+bakes_filtered = anti_join(bakes_df, gbb_df, by = "baker")
 
+## add the left rows
+gbb_df = bind_rows(gbb_df, bakes_filtered) |>
+  mutate(baker = ifelse(baker == '"Jo"', "Jo", baker))
+
+## modify the datasets for further combination
+bakers_df = bakers_df |>
+  separate(baker_name, into = c("baker_first_name", "baker_last_name"), sep = " ")
+
+## join bakers_df to the combined dataset, organize variables and observations
+gbb_df = rename(gbb_df, baker_first_name = baker) |>
+  left_join(bakers_df, by = c("baker_first_name", "series")) |>
+  relocate(baker_first_name, baker_last_name, series, episode, baker_age, baker_occupation, hometown) |>
+  arrange(baker_first_name, series)
+
+print(gbb_df)
+
+write_csv(gbb_df, "data/gbb_datasets/combined_gbb.csv")
+```
+
+### Description
+
+For data cleaning, I first used the janitor::clean() function to unite the format of the variable names and define NA values. Since the result variable in results_df continues to show values even after the baker was ousted in the previous episode, which leads it to hold many unnecessary NA values, I also omit these NA result values to simplify the dataframe. Since the results are abbreviations and the meaning of them are included in the first line that makes the dataframe untidy, I changed the abbreviations to their direct meanings. Then, considering there are many duplicate variables results_df and bakes_df hold (series, episode, baker), I first join these two dataframes by these three variables. However, when I check the corectness across datasets using the anti_join() function, I found that there is one baker named "Jo" who is not in the results_df but in the bakes_df, so I appended rows of this baker to the combined dataframe additionally. For the bakers_df, since its baker name variable contains both the baker's first and last names, to make it in line with the other two dataframes, I separate this variable into two variables (baker_first_name and baker_last_name), and rename the baker variable in the combined dataset to baker_first_name. This makes the join of bakers_df into the combined gbb_df much easier. Lastly, for the readability of the dataframe, I chose to reorder the variables to put the names of the bakers at front and the results and signature bakes at last. Also, since one baker will appear in the same series for multiple times, for the tidiness of the dataframe, I arrange the bakers' names to be shown alphabetically. 
+
+The final dataset gbb_df has `r nrow(gbb_df)` observations and `r ncol(gbb_df)` variables, including the bakers' first name and last name, the series and episode they appeared in, their age, occupation, hometown, technical scores, signature bake, show stopper, and show results. Note that not all bakers have information about all these variables, and those lost information are marked as NA.
+
+- Create a reader-friendly table showing the star baker or winner of each episode in Seasons 5 through 10. Comment on this table – were there any predictable overall winners? Any surprises?
+
+```{r}
+star_winner = gbb_df|>
+  filter(result %in% c("Star Baker", "Series Winner"), series %in% c(5, 6, 7, 8, 9, 10)) |>
+  relocate(result) |>
+  arrange(series)
+
+star_winner_table = as_tibble(star_winner)
+print(star_winner_table)
+```
+
+As we can see from the table above, for series 6-9, the series winners have all been the star baker for multiple episodes, so their winnings are largely predictable. However, the series winner in series 5, Nancy Birtwhistle, has only been the star baker once, and that the series winner in series 10, David Atherton, even has not been a star baker for a single time in this series. People would have predicted other star bakers like Richard Burr (5) and Steph Blackwell (10) to be the series winner in their respective series, so these two winners are quite surprises. 
+
+- Import, clean, tidy, and organize the viewership data in viewers.csv. Show the first 10 rows of this dataset. What was the average viewership in Season 1? In Season 5?
+
+```{r}
+viewers_df = read_csv("data/gbb_datasets/viewers.csv", na = "NA", show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  pivot_longer(
+    cols = series_1:series_10,
+    names_to = "series",
+    values_to = "viewership",
+    names_prefix = "series_"
+      ) |>
+  mutate(series = as.numeric(series)) |>
+  relocate(series) |>
+  arrange(series)
+
+print(viewers_df, n = 10)
+
+season_1 = filter(viewers_df, series == 1)
+season_5 = filter(viewers_df, series == 5)
+
+sum(na.omit(select(season_1, viewership)))/sum(!is.na(select(season_1, viewership)))
+sum(select(season_5, viewership))/nrow(season_5)
+
+```
+
+The average viewership in Season 1 is 2.77, in Season 5 is 10.0393
 
 
 
